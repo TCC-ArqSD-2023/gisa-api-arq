@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace GisaApiArq.API
 {
-    public class ControladorBase<T> : ControllerBase where T : EntidadeBase
+    public abstract class ControladorBase<T, DTO> : ControllerBase where T : EntidadeBase where DTO : class
     {
-        protected readonly ILogger<ControladorBase<T>> _logger;
+        protected readonly ILogger<ControladorBase<T, DTO>> _logger;
         protected readonly IServicoBase<T> _servico;
 
-        public ControladorBase(ILogger<ControladorBase<T>> logger, IServicoBase<T> servico)
+        public ControladorBase(ILogger<ControladorBase<T, DTO>> logger, IServicoBase<T> servico)
         {
             _logger = logger;
             _servico = servico;
