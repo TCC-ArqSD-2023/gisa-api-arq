@@ -1,8 +1,11 @@
-﻿using GisaApiArq.Dominio;
-using GisaApiArq.Infra;
+﻿using AutoMapper;
+using GisaApiArq.Dominio;
+using GisaApiArq.Dominio.Erros;
 using GisaApiArq.Servicos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace GisaApiArq.API
 {
@@ -10,43 +13,81 @@ namespace GisaApiArq.API
     {
         protected new readonly IServicoCrudBase<T> _servico;
 
-        protected ControladorCrudBase(ILogger<ControladorCrudBase<T, DTO>> logger, IServicoCrudBase<T> servico) : base(logger, servico)
+        protected ControladorCrudBase(ILogger<ControladorCrudBase<T, DTO>> logger, IServicoCrudBase<T> servico, IMapper mapper) : base(logger, servico, mapper)
         {
             _servico = servico;
         }
 
         [HttpPost]
-        public virtual IActionResult Inserir(long id, DTO dto)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(List<FluentResults.Error>), StatusCodes.Status500InternalServerError)]
+        public virtual IActionResult Inserir(DTO dto)
         {
-            _servico.Inserir(converterDTO(dto));
-            return Ok();
+            _logger.LogInformation($"Acionado recurso {nameof(Inserir)}.");
+            var resultado = _servico.Inserir(converterDTO(dto));
+
+            if (resultado.IsFailed)
+                return retornarErroGenerico(resultado.Errors);
+
+            var entidade = resultado.Value;
+            
+            return CreatedAtAction(nameof(ObterPorId), new {id = entidade.Id}, entidade);
         }
 
         [HttpGet]
         public virtual IActionResult ObterTodos([FromQuery] int skip = 0,[FromQuery] int take = 50)
         {
-            _logger.LogInformation("Acionado ObterTodos");
-            return Ok(_servico.ObterTodos().Value);
+            _logger.LogInformation($"Acionado recurso {nameof(ObterTodos)}. Skip {skip}, Take {take}.");
+
+            var resultado = _servico.ObterTodos();
+            
+            if (resultado.IsFailed)
+                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+
+            return Ok(resultado.Value);
         }
 
         [HttpGet("{id}")]
         public virtual IActionResult ObterPorId(long id)
         {
+            _logger.LogInformation($"Acionado recurso {nameof(ObterPorId)}.");
+
+            var resultado = _servico.ObterPorId(id);
+            if (resultado.IsFailed)
+            {
+                if(resultado.HasError<NaoEncontradoError>())
+                    return NotFound();
+
+                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+            }
+
             return Ok(_servico.ObterPorId(id).Value);
         }
 
         [HttpPut("{id}")]
         public virtual IActionResult Atualizar(long id, [FromBody] DTO dto)
         {
-            _servico.Atualizar(converterDTO(dto));
-            return Ok();
+            _logger.LogInformation($"Acionado recurso {nameof(Atualizar)}.");
+
+            var resultado = _servico.Atualizar(id, converterDTO(dto));
+
+            if (resultado.IsFailed)
+                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public virtual IActionResult Remover(long id)
         {
-            _servico.Remover(id);
-            return Ok();
+            _logger.LogInformation($"Acionado recurso {nameof(Remover)}.");
+            
+            var resultado = _servico.Remover(id);
+
+            if (resultado.IsFailed)
+                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+
+            return NoContent();
         }
 
         protected T converterDTO(DTO dto)
@@ -54,8 +95,12 @@ namespace GisaApiArq.API
             if (dto is T)
                 return dto as T;
 
-            //_logger.LogError("Não foi possível converter DTO.");
-            throw new NotImplementedException("Não foi possível converter DTO.");
+            return _mapper.Map<T>(dto);
+        }
+
+        private IActionResult retornarErroGenerico(object? retorno)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, retorno);
         }
     }
 }

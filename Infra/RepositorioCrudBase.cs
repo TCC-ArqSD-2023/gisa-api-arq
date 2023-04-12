@@ -1,5 +1,8 @@
-﻿using GisaApiArq.Dominio;
+﻿using AutoMapper;
+using GisaApiArq.Dominio;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,26 +13,26 @@ namespace GisaApiArq.Infra
 {
     public class RepositorioCrudBase<T> : RepositorioBase<T>, IRepositorioCrudBase<T> where T : EntidadeBase
     {
-        private readonly DbContext _contexto;
-        private DbSet<T> _colecao;
+        protected readonly DbContext _contexto;
+        protected DbSet<T> _colecao;
 
-        public RepositorioCrudBase(DbContext contexto)
+        public RepositorioCrudBase(DbContext contexto, ILogger<RepositorioBase<T>> logger, IMapper mapper) : base(logger, mapper)
         {
             _contexto = contexto;
             _colecao = _contexto.Set<T>();
         }
 
-        public IEnumerable<T> ObterTodos()
+        public virtual IEnumerable<T> ObterTodos()
         {
             return _colecao.AsEnumerable();
         }
 
-        public T? ObterPorId(long id)
+        public virtual T? ObterPorId(long id)
         {
             return _colecao.SingleOrDefault(e => e.Id == id);
         }
 
-        public void Inserir(T entidade)
+        public virtual void Inserir(T entidade)
         {
             if (entidade == null)
             {
@@ -39,19 +42,15 @@ namespace GisaApiArq.Infra
             _contexto.SaveChanges();
         }
 
-        public void Atualizar(T entidade)
+        public virtual void Atualizar(T entidade)
         {
-            if (entidade == null)
-            {
-                throw new ArgumentNullException("entidade");
-            }
             _colecao.Attach(entidade);
             _contexto.Entry(entidade).State = EntityState.Modified;
 
             _contexto.SaveChanges();
         }
 
-        public void Remover(long id)
+        public virtual void Remover(long id)
         {
             var entidade = ObterPorId(id);
             if (entidade == null)

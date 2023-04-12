@@ -12,8 +12,8 @@ namespace GisaApiArq.Servicos
     {
         Result<IEnumerable<T>> ObterTodos();
         Result<T?> ObterPorId(long id);
-        Result Inserir(T entidade);
-        Result Atualizar(T entidade);
+        Result<T> Inserir(T entidade);
+        Result Atualizar(long id, T entidade);
         Result Remover(long id);
     }
 }

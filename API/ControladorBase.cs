@@ -1,4 +1,5 @@
-﻿using GisaApiArq.Dominio;
+﻿using AutoMapper;
+using GisaApiArq.Dominio;
 using GisaApiArq.Servicos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -14,11 +15,14 @@ namespace GisaApiArq.API
     {
         protected readonly ILogger<ControladorBase<T, DTO>> _logger;
         protected readonly IServicoBase<T> _servico;
+        protected readonly IMapper _mapper;
 
-        public ControladorBase(ILogger<ControladorBase<T, DTO>> logger, IServicoBase<T> servico)
+
+        public ControladorBase(ILogger<ControladorBase<T, DTO>> logger, IServicoBase<T> servico, IMapper mapper)
         {
             _logger = logger;
             _servico = servico;
+            _mapper = mapper;
         }
     }
 }
