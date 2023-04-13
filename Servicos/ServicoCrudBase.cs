@@ -65,6 +65,8 @@ namespace GisaApiArq.Servicos
         {
             try
             {
+                entidade.Id = id;
+
                 var resultado = ObterPorId(id);
                 if (resultado.IsFailed)
                     return Result.Fail(resultado.Errors);
