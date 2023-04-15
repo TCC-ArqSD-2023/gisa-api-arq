@@ -9,17 +9,17 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Verify commit exists in origin/main
+    - name: Verifica se o commit existe em origin/main
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
         git branch --remote --contains | grep origin/main
-    - name: Set VERSION variable from tag
-      run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+    - name: Define variável VERSAO a partir da tag
+      run: echo "VERSAO=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Build
-      run: dotnet build --configuration Release /p:Version=${VERSION}
+      run: dotnet build --configuration Release /p:Version=${VERSAO}
     - name: Pack
-      run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
+      run: dotnet pack --configuration Release /p:Version=${VERSAO} --no-build --output .
     - name: Push
-      run: dotnet nuget push Gisa.GisaApiArq.${VERSION}.nupkg --source https://nuget.pkg.github.com/TCC-ArqSD-2023/index.json --api-key ${DINOBRIPAT_NUGET}
+      run: dotnet nuget push Gisa.GisaApiArq.${VERSAO}.nupkg --source https://nuget.pkg.github.com/TCC-ArqSD-2023/index.json --api-key ${DINOBRIPAT_NUGET}
       env:
         DINOBRIPAT_NUGET: ${{ secrets.DINOBRIPAT_NUGET }}
