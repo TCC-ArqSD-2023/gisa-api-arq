@@ -13,4 +13,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include=".github\workflows\ci.yaml" />
+  </ItemGroup>
+
 </Project>
