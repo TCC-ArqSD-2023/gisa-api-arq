@@ -20,6 +20,6 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
     - name: Push
-      run: dotnet nuget push Gisa.GisaApiArq.${VERSION}.nupkg --source https://nuget.pkg.github.com/TCC-ArqSD-2023/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push Gisa.GisaApiArq.${VERSION}.nupkg --source https://nuget.pkg.github.com/TCC-ArqSD-2023/index.json --api-key ${DINOBRIPAT_NUGET}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DINOBRIPAT_NUGET: ${{ secrets.DINOBRIPAT_NUGET }}

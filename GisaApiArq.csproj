@@ -20,7 +20,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include=".github\workflows\ci.yaml" />
 		<None Include=".github\workflows\release.yaml" />
 	</ItemGroup>
 
