@@ -20,7 +20,7 @@ jobs:
       id: get-version
       with:
         proj-path: GisaApiArq.csproj
-    - run: echo "${{steps.get-version.outputs.version}}"
+    - run: echo "VERSAO=${{steps.get-version.outputs.version}}" >> $GITHUB_ENV 
     - name: Build
       run: dotnet build --configuration Release /p:Version=${VERSAO}
     - name: Pack
