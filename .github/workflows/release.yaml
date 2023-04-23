@@ -1,7 +1,7 @@
 on:
   push:
-    tags:
-    - "v[0-9]+.[0-9]+.[0-9]+"
+    branches:
+    - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,8 +13,14 @@ jobs:
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
         git branch --remote --contains | grep origin/main
-    - name: Define variável VERSAO a partir da tag
-      run: echo "VERSAO=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+    #- name: Define variável VERSAO a partir da tag
+    #  run: echo "VERSAO=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+    - name: Obtem versão do csproj
+      uses: kzrnm/get-net-sdk-project-versions-action@v1
+      id: get-version
+      with:
+        proj-path: GisaApiArq/GisaApiArq.csproj
+    - run: echo "${{steps.get-version.outputs.version}}"
     - name: Build
       run: dotnet build --configuration Release /p:Version=${VERSAO}
     - name: Pack
@@ -23,3 +29,7 @@ jobs:
       run: dotnet nuget push Gisa.GisaApiArq.${VERSAO}.nupkg --source https://nuget.pkg.github.com/TCC-ArqSD-2023/index.json --api-key ${DINOBRIPAT_NUGET}
       env:
         DINOBRIPAT_NUGET: ${{ secrets.DINOBRIPAT_NUGET }}
+    - uses: actions-ecosystem/action-push-tag@v1
+      with:
+        tag: v${{ steps.get-version.outputs.version }}
+        message: 'v${{ steps.bump-semver.outputs.new_version }}'
