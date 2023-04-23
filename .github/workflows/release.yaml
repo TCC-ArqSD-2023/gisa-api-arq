@@ -19,7 +19,7 @@ jobs:
       uses: kzrnm/get-net-sdk-project-versions-action@v1
       id: get-version
       with:
-        proj-path: GisaApiArq/GisaApiArq.csproj
+        proj-path: GisaApiArq.csproj
     - run: echo "${{steps.get-version.outputs.version}}"
     - name: Build
       run: dotnet build --configuration Release /p:Version=${VERSAO}
