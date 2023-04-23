@@ -35,6 +35,8 @@ namespace GisaApiArq.API
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<FluentResults.Error>), StatusCodes.Status500InternalServerError)]
         public virtual IActionResult ObterTodos([FromQuery] int skip = 0,[FromQuery] int take = 50)
         {
             _logger.LogInformation($"Acionado recurso {nameof(ObterTodos)}. Skip {skip}, Take {take}.");
@@ -48,6 +50,8 @@ namespace GisaApiArq.API
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<FluentResults.Error>), StatusCodes.Status500InternalServerError)]
         public virtual IActionResult ObterPorId(long id)
         {
             _logger.LogInformation($"Acionado recurso {nameof(ObterPorId)}.");
@@ -65,6 +69,8 @@ namespace GisaApiArq.API
         }
 
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(List<FluentResults.Error>), StatusCodes.Status500InternalServerError)]
         public virtual IActionResult Atualizar(long id, [FromBody] DTO dto)
         {
             _logger.LogInformation($"Acionado recurso {nameof(Atualizar)}.");
@@ -78,6 +84,8 @@ namespace GisaApiArq.API
         }
 
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(List<FluentResults.Error>), StatusCodes.Status500InternalServerError)]
         public virtual IActionResult Remover(long id)
         {
             _logger.LogInformation($"Acionado recurso {nameof(Remover)}.");
@@ -98,7 +106,7 @@ namespace GisaApiArq.API
             return _mapper.Map<T>(dto);
         }
 
-        private IActionResult retornarErroGenerico(object? retorno)
+        protected IActionResult retornarErroGenerico(object? retorno)
         {
             return StatusCode(StatusCodes.Status500InternalServerError, retorno);
         }
