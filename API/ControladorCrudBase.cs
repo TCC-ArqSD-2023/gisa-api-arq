@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentResults;
 using GisaApiArq.Dominio;
 using GisaApiArq.Dominio.Erros;
 using GisaApiArq.Servicos;
@@ -30,23 +31,33 @@ namespace GisaApiArq.API
                 return retornarErroGenerico(resultado.Errors);
 
             var entidade = resultado.Value;
-            
-            return CreatedAtAction(nameof(ObterPorId), new {id = entidade.Id}, entidade);
+
+            return CreatedAtAction(nameof(ObterPorId), new { id = entidade.Id }, entidade);
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(List<FluentResults.Error>), StatusCodes.Status500InternalServerError)]
-        public virtual IActionResult ObterTodos([FromQuery] int skip = 0,[FromQuery] int take = 50)
+        public virtual IActionResult Obter([FromQuery] IEnumerable<long> id)
         {
-            _logger.LogInformation($"Acionado recurso {nameof(ObterTodos)}. Skip {skip}, Take {take}.");
+            _logger.LogInformation($"Acionado recurso {nameof(Obter)}.");
 
-            var resultado = _servico.ObterTodos();
-            
+            Result<IEnumerable<T>> resultado;
+
+            if (id == null || id.Count() == 0)
+                resultado = _servico.ObterTodos();
+            else
+                resultado = _servico.ObterPorIds(id);
+
             if (resultado.IsFailed)
-                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+            {
+                if (resultado.HasError<NaoEncontradoError>())
+                    return NotFound();
 
-            return Ok(resultado.Value);
+                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+            }
+
+            return Ok(_mapper.Map<IEnumerable<DTO>>(resultado.Value));
         }
 
         [HttpGet("{id}")]
@@ -59,14 +70,15 @@ namespace GisaApiArq.API
             var resultado = _servico.ObterPorId(id);
             if (resultado.IsFailed)
             {
-                if(resultado.HasError<NaoEncontradoError>())
+                if (resultado.HasError<NaoEncontradoError>())
                     return NotFound();
 
                 return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
             }
 
-            return Ok(_servico.ObterPorId(id).Value);
+            return Ok(resultado.Value);
         }
+
 
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -89,21 +101,13 @@ namespace GisaApiArq.API
         public virtual IActionResult Remover(long id)
         {
             _logger.LogInformation($"Acionado recurso {nameof(Remover)}.");
-            
+
             var resultado = _servico.Remover(id);
 
             if (resultado.IsFailed)
                 return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
 
             return NoContent();
-        }
-
-        protected T converterDTO(DTO dto)
-        {
-            if (dto is T)
-                return dto as T;
-
-            return _mapper.Map<T>(dto);
         }
 
         protected IActionResult retornarErroGenerico(object? retorno)

@@ -24,5 +24,13 @@ namespace GisaApiArq.API
             _servico = servico;
             _mapper = mapper;
         }
+
+        protected T converterDTO(DTO dto)
+        {
+            if (dto is T)
+                return dto as T;
+
+            return _mapper.Map<T>(dto);
+        }
     }
 }

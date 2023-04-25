@@ -12,6 +12,7 @@ namespace GisaApiArq.Servicos
     {
         Result<IEnumerable<T>> ObterTodos();
         Result<T?> ObterPorId(long id);
+        Result<IEnumerable<T>> ObterPorIds(IEnumerable<long> ids);
         Result<T> Inserir(T entidade);
         Result Atualizar(long id, T entidade);
         Result Remover(long id);

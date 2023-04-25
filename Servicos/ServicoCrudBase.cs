@@ -46,6 +46,21 @@ namespace GisaApiArq.Servicos
                 return Result.Fail(new ErroInternoError(ex.Message));
             }
         }
+        public Result<IEnumerable<T>> ObterPorIds(IEnumerable<long> ids)
+        {
+            if (ids == null || ids.Count() == 0)
+                return Result.Fail("Lista de IDs de parâmetro vazia.");
+
+            try
+            {
+                return Result.Ok(_repositorio.ObterTodos().Where(t => ids.Contains(t.Id)));
+            }
+            catch (Exception ex)
+            {
+                return Result.Fail(new ErroInternoError(ex.Message));
+            }
+        }
+
 
         public virtual Result<T> Inserir(T entidade)
         {
