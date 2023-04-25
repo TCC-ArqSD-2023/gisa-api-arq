@@ -1,3 +1,5 @@
+name: Constrói, publica pacote Nuget e gera tag de uma versão
+
 on:
   push:
     branches:
@@ -25,11 +27,12 @@ jobs:
       run: dotnet build --configuration Release /p:Version=${VERSAO}
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${VERSAO} --no-build --output .
+    - name: Tag
+      uses: anothrNick/github-tag-action@1.62.0
+      env: 
+        GITHUB_TOKEN: ${{ secrets.DINOBRIPAT_NUGET }}
+        CUSTOM_TAG: 'v${{ steps.get-version.outputs.version }}'
     - name: Push
       run: dotnet nuget push Gisa.GisaApiArq.${VERSAO}.nupkg --source https://nuget.pkg.github.com/TCC-ArqSD-2023/index.json --api-key ${DINOBRIPAT_NUGET}
       env:
         DINOBRIPAT_NUGET: ${{ secrets.DINOBRIPAT_NUGET }}
-    - uses: actions-ecosystem/action-push-tag@v1
-      with:
-        tag: v${{ steps.get-version.outputs.version }}
-        message: 'v${{ steps.bump-semver.outputs.new_version }}'
