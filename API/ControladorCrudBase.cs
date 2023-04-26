@@ -54,7 +54,7 @@ namespace GisaApiArq.API
                 if (resultado.HasError<NaoEncontradoError>())
                     return NotFound();
 
-                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+                return retornarErroGenerico(resultado.Errors.Select(e => e.Message));
             }
 
             return Ok(_mapper.Map<IEnumerable<DTO>>(resultado.Value));
@@ -73,7 +73,7 @@ namespace GisaApiArq.API
                 if (resultado.HasError<NaoEncontradoError>())
                     return NotFound();
 
-                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+                return retornarErroGenerico(resultado.Errors.Select(e => e.Message));
             }
 
             return Ok(resultado.Value);
@@ -90,7 +90,7 @@ namespace GisaApiArq.API
             var resultado = _servico.Atualizar(id, converterDTO(dto));
 
             if (resultado.IsFailed)
-                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+                return retornarErroGenerico(resultado.Errors.Select(e => e.Message));
 
             return NoContent();
         }
@@ -105,14 +105,9 @@ namespace GisaApiArq.API
             var resultado = _servico.Remover(id);
 
             if (resultado.IsFailed)
-                return retornarErroGenerico(resultado.Errors.FirstOrDefault()?.Message);
+                return retornarErroGenerico(resultado.Errors.Select(e => e.Message));
 
             return NoContent();
-        }
-
-        protected IActionResult retornarErroGenerico(object? retorno)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, retorno);
         }
     }
 }

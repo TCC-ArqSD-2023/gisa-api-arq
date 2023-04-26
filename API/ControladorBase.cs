@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GisaApiArq.Dominio;
 using GisaApiArq.Servicos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -25,12 +26,27 @@ namespace GisaApiArq.API
             _mapper = mapper;
         }
 
-        protected T converterDTO(DTO dto)
+        protected virtual T converterDTO(DTO dto)
         {
             if (dto is T)
                 return dto as T;
 
             return _mapper.Map<T>(dto);
+        }
+
+        protected virtual IActionResult retornarErroGenerico(string retorno)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, retorno);
+        }
+
+        protected virtual IActionResult retornarErroGenerico(IEnumerable<string> retorno)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, retorno);
+        }
+
+        protected virtual IActionResult retornarErroGenerico(object? retorno)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, retorno);
         }
     }
 }
