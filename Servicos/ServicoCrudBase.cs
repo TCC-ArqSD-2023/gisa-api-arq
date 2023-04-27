@@ -38,7 +38,7 @@ namespace GisaApiArq.Servicos
             {
                 var entidade = _repositorio.ObterPorId(id);
                 if (entidade == null)
-                    return Result.Fail(new NaoEncontradoError(id, nameof(T)));
+                    return Result.Fail(new NaoEncontradoError(id, typeof(T).Name));
 
                 return Result.Ok<T?>(entidade);
             } catch (Exception ex)
